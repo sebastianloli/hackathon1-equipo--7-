@@ -5,29 +5,31 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "sales")
 @Data
-public class User {
+public class Sale {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 30)
-    private String username;
+    @Column(nullable = false)
+    private String sku;
 
     @Column(nullable = false)
-    private String email;
+    private Integer units;
 
     @Column(nullable = false)
-    private String password;
+    private Double price;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;
+    private String branch;
 
-    @Column(name = "branch")
-    private String branch; // null para CENTRAL, nombre de sucursal para BRANCH
+    @Column(name = "sold_at", nullable = false)
+    private LocalDateTime soldAt;
+
+    @Column(name = "created_by")
+    private String createdBy; // username del usuario que creó la venta
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -36,9 +38,5 @@ public class User {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
-
-    public enum Role {
-        CENTRAL,
-        BRANCH
-    }
 }
+

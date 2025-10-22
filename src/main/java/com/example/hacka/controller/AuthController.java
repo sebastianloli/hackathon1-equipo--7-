@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
@@ -23,40 +23,75 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        String email = request.get("email");
+        String password = request.get("password");
+        String role = request.get("role");
+        String branch = request.get("branch");
+
+        // Validaciones
+        if (userRepository.findByUsername(username).isPresent()) {
+            return ResponseEntity.status(409).body(Map.of("error", "CONFLICT", "message", "Username ya existe"));
+        }
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            return ResponseEntity.status(409).body(Map.of("error", "CONFLICT", "message", "Email ya existe"));
+        }
+
+        // Validar role
+        if (!role.equals("CENTRAL") && !role.equals("BRANCH")) {
+            return ResponseEntity.status(400).body(Map.of("error", "BAD_REQUEST", "message", "Role debe ser CENTRAL o BRANCH"));
+        }
+
+        // Validar branch
+        if (role.equals("BRANCH") && (branch == null || branch.isBlank())) {
+            return ResponseEntity.status(400).body(Map.of("error", "BAD_REQUEST", "message", "Branch obligatorio para ROLE_BRANCH"));
+        }
+
+        if (role.equals("CENTRAL") && branch != null) {
+            branch = null; // CENTRAL no tiene branch
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(User.Role.valueOf(role));
+        user.setBranch(branch);
+
+        user = userRepository.save(user);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", user.getId());
+        response.put("username", user.getUsername());
+        response.put("email", user.getEmail());
+        response.put("role", user.getRole().name());
+        response.put("branch", user.getBranch());
+        response.put("createdAt", user.getCreatedAt());
+
+        return ResponseEntity.status(201).body(response);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        System.out.println("=== LOGIN REQUEST RECEIVED ===");
         String username = credentials.get("username");
         String password = credentials.get("password");
 
-        System.out.println("Username: " + username);
-        System.out.println("Password provided: " + (password != null ? "yes" : "no"));
-
         User user = userRepository.findByUsername(username).orElse(null);
 
-        if (user == null) {
-            System.out.println("User not found: " + username);
-            return ResponseEntity.status(401).body("Invalid credentials - user not found");
-        }
-
-        System.out.println("User found: " + user.getUsername());
-        System.out.println("Password matches: " + passwordEncoder.matches(password, user.getPassword()));
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            System.out.println("Password does not match");
-            return ResponseEntity.status(401).body("Invalid credentials - wrong password");
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+            return ResponseEntity.status(401).body(Map.of("error", "UNAUTHORIZED", "message", "Invalid credentials"));
         }
 
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
-        response.put("username", user.getUsername());
+        response.put("expiresIn", 3600);
         response.put("role", user.getRole().name());
-        response.put("companyId", user.getCompany() != null ? user.getCompany().getId() : null);
-
-        System.out.println("Login successful for: " + username);
-        System.out.println("=== END LOGIN REQUEST ===");
+        response.put("branch", user.getBranch());
 
         return ResponseEntity.ok(response);
     }

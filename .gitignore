@@ -32,4 +32,15 @@ build/
 ### VS Code ###
 .vscode/
 
+# Environment variables - CRÍTICO
+.env
+.env.local
+.env.production
+application.properties
+application-prod.properties
+application-dev.properties
 
+# Sensitive data
+*secret*
+*token*
+*password*
