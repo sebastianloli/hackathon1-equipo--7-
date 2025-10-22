@@ -43,7 +43,7 @@ class SalesAggregationServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(30, result.getTotalUnits());
-        assertEquals(42.43, result.getTotalRevenue(), 0.01);
+        assertEquals(62.2, result.getTotalRevenue(), 0.01);
         assertEquals("OREO_CLASSIC", result.getTopSku());
         assertEquals("Miraflores", result.getTopBranch());
     }

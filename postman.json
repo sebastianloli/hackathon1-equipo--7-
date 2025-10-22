@@ -1,427 +1,666 @@
 {
   "info": {
-    "name": "Sparky AI System API",
+    "name": "Oreo Insight Factory - Complete Tests",
+    "description": "Colección completa para probar el backend de Oreo Insight Factory",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "centralToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "branchToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "saleId",
+      "value": "",
+      "type": "string"
+    }
+  ],
   "item": [
     {
-      "name": "Auth",
+      "name": "1. Authentication",
       "item": [
         {
-          "name": "Login",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": "http://localhost:8080/api/auth/login",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"superadmin\",\n  \"password\": \"admin123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+          "name": "1.1 Register CENTRAL User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has user data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('username');",
+                  "    pm.expect(jsonData.role).to.eql('CENTRAL');",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
-          }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"oreo.admin\",\n  \"email\": \"admin@oreo.com\",\n  \"password\": \"Oreo1234\",\n  \"role\": \"CENTRAL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.2 Login CENTRAL User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has token', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.collectionVariables.set('centralToken', jsonData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"oreo.admin\",\n  \"password\": \"Oreo1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.3 Register BRANCH User (Miraflores)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Branch user created correctly', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.role).to.eql('BRANCH');",
+                  "    pm.expect(jsonData.branch).to.eql('Miraflores');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"miraflores.user\",\n  \"email\": \"mira@oreo.com\",\n  \"password\": \"Oreo1234\",\n  \"role\": \"BRANCH\",\n  \"branch\": \"Miraflores\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.4 Login BRANCH User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Branch token received', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.collectionVariables.set('branchToken', jsonData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"miraflores.user\",\n  \"password\": \"Oreo1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "Admin - Companies",
+      "name": "2. Sales Management (CENTRAL)",
       "item": [
         {
-          "name": "Create Company",
+          "name": "2.1 Create Sale - Miraflores",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Sale created with ID', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('saleId', jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
               {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{centralToken}}"
               }
             ],
-            "url": "http://localhost:8080/api/admin/companies",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Tech Corp\",\n  \"ruc\": \"20123456789\",\n  \"adminUsername\": \"admin1\",\n  \"adminPassword\": \"password123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"sku\": \"OREO_CLASSIC_12\",\n  \"units\": 25,\n  \"price\": 1.99,\n  \"branch\": \"Miraflores\",\n  \"soldAt\": \"2025-09-01T10:30:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales"]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Get All Companies",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/admin/companies"
-          }
-        },
-        {
-          "name": "Get Company By ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/admin/companies/1"
-          }
-        },
-        {
-          "name": "Update Company",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/admin/companies/1",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Tech Corp Updated\",\n  \"ruc\": \"20123456789\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Toggle Company Status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/admin/companies/1/status"
-          }
-        },
-        {
-          "name": "Get Company Consumption",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/admin/companies/1/consumption"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Company Admin - Restrictions",
-      "item": [
-        {
-          "name": "Create Restriction",
+          "name": "2.2 Create Sale - Miraflores (OREO_DOUBLE)",
           "request": {
             "method": "POST",
             "header": [
               {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{centralToken}}"
               }
             ],
-            "url": "http://localhost:8080/api/company/restrictions",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"companyId\": 1,\n  \"modelType\": \"gpt-5-mini\",\n  \"usageLimit\": 1000\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"sku\": \"OREO_DOUBLE\",\n  \"units\": 40,\n  \"price\": 2.49,\n  \"branch\": \"Miraflores\",\n  \"soldAt\": \"2025-09-02T15:10:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales"]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Get Restrictions",
+          "name": "2.3 Create Sale - San Isidro (OREO_THINS)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{centralToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"OREO_THINS\",\n  \"units\": 32,\n  \"price\": 2.19,\n  \"branch\": \"San Isidro\",\n  \"soldAt\": \"2025-09-03T11:05:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.4 Create Sale - San Isidro (OREO_DOUBLE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{centralToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"OREO_DOUBLE\",\n  \"units\": 55,\n  \"price\": 2.49,\n  \"branch\": \"San Isidro\",\n  \"soldAt\": \"2025-09-04T18:50:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.5 Create Sale - Miraflores (Final)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{centralToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"OREO_CLASSIC_12\",\n  \"units\": 20,\n  \"price\": 1.99,\n  \"branch\": \"Miraflores\",\n  \"soldAt\": \"2025-09-05T09:40:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.6 Get All Sales (CENTRAL)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Central can see all sales', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.content.length).to.be.greaterThan(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{centralToken}}"
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/company/restrictions?companyId=1",
-              "query": [
-                {
-                  "key": "companyId",
-                  "value": "1"
-                }
-              ]
+              "raw": "{{baseUrl}}/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales"]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Update Restriction",
+          "name": "2.7 Get Sale by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{centralToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sales/{{saleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales", "{{saleId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.8 Update Sale",
           "request": {
             "method": "PUT",
             "header": [
               {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{centralToken}}"
               }
             ],
-            "url": "http://localhost:8080/api/company/restrictions/1",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"modelType\": \"gpt-5-mini\",\n  \"usageLimit\": 2000\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
+              "raw": "{\n  \"sku\": \"OREO_CLASSIC_12\",\n  \"units\": 30,\n  \"price\": 1.99,\n  \"branch\": \"Miraflores\",\n  \"soldAt\": \"2025-09-01T10:30:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sales/{{saleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales", "{{saleId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Sales Management (BRANCH)",
+      "item": [
+        {
+          "name": "3.1 Get Sales (BRANCH - Only Miraflores)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Branch can only see their sales', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    jsonData.content.forEach(function(sale) {",
+                  "        pm.expect(sale.branch).to.eql('Miraflores');",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
               }
             }
-          }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{branchToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales"]
+            }
+          },
+          "response": []
         },
         {
-          "name": "Delete Restriction",
+          "name": "3.2 Create Sale (BRANCH - Own Branch)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{branchToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"OREO_GOLDEN\",\n  \"units\": 15,\n  \"price\": 2.99,\n  \"branch\": \"Miraflores\",\n  \"soldAt\": \"2025-09-06T14:20:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.3 Try Create Sale (BRANCH - Other Branch) - Should FAIL 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 403 Forbidden', function() {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{branchToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"OREO_CLASSIC_12\",\n  \"units\": 10,\n  \"price\": 1.99,\n  \"branch\": \"San Isidro\",\n  \"soldAt\": \"2025-09-06T14:20:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Weekly Summary (Async)",
+      "item": [
+        {
+          "name": "4.1 Request Weekly Summary (BRANCH)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 202 Accepted', function() {",
+                  "    pm.response.to.have.status(202);",
+                  "});",
+                  "",
+                  "pm.test('Response has requestId and status PROCESSING', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('requestId');",
+                  "    pm.expect(jsonData.status).to.eql('PROCESSING');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{branchToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"2025-09-01\",\n  \"to\": \"2025-09-07\",\n  \"branch\": \"Miraflores\",\n  \"emailTo\": \"gerente@oreo.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sales/summary/weekly",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales", "summary", "weekly"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.2 Request Weekly Summary (CENTRAL - All Branches)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 202 Accepted', function() {",
+                  "    pm.response.to.have.status(202);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{centralToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"2025-09-01\",\n  \"to\": \"2025-09-07\",\n  \"emailTo\": \"admin@oreo.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sales/summary/weekly",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales", "summary", "weekly"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Delete Operations (CENTRAL Only)",
+      "item": [
+        {
+          "name": "5.1 Delete Sale (CENTRAL)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 204 No Content', function() {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/company/restrictions/1"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Company Admin - Users",
-      "item": [
-        {
-          "name": "Create User",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/company/users",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"user1\",\n  \"email\": \"user1@techcorp.com\",\n  \"password\": \"password123\",\n  \"companyId\": \"1\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get Users",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "value": "Bearer {{centralToken}}"
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/company/users?companyId=1",
-              "query": [
-                {
-                  "key": "companyId",
-                  "value": "1"
-                }
-              ]
+              "raw": "{{baseUrl}}/sales/{{saleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["sales", "{{saleId}}"]
             }
-          }
-        },
-        {
-          "name": "Get User By ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/company/users/1"
-          }
-        },
-        {
-          "name": "Update User",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/company/users/1",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"user1_updated\",\n  \"email\": \"user1_updated@techcorp.com\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Assign User Limit",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/company/users/1/limits",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"modelType\": \"gpt-5-mini\",\n  \"requestLimitPerWindow\": 100,\n  \"tokenLimitPerWindow\": 10000,\n  \"timeWindowMinutes\": 60\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get User Consumption",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/company/users/1/consumption"
-          }
-        }
-      ]
-    },
-    {
-      "name": "AI Endpoints",
-      "item": [
-        {
-          "name": "Chat",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/ai/chat",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"message\": \"Hello, how are you?\",\n  \"model\": \"gpt-5-mini\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Completion",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/ai/completion",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"message\": \"Complete this text: The future of AI is\",\n  \"model\": \"gpt-5-mini\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Multimodal",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/ai/multimodal",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"message\": \"Describe this image\",\n  \"model\": \"gpt-5-mini\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          }
-        },
-        {
-          "name": "Get Available Models",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/ai/models"
-          }
-        },
-        {
-          "name": "Get Request History",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": "http://localhost:8080/api/ai/history"
-          }
+          },
+          "response": []
         }
       ]
     }
