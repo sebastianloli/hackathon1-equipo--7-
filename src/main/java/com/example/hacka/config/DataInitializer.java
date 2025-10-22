@@ -20,25 +20,19 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (userRepository.findByUsername("superadmin").isEmpty()) {
-            User superAdmin = new User();
-            superAdmin.setUsername("superadmin");
-            superAdmin.setEmail("superadmin@sparky.com");
-            superAdmin.setPassword(passwordEncoder.encode("admin123"));
-            superAdmin.setRole(User.Role.ROLE_SPARKY_ADMIN);
-            superAdmin.setCompany(null);
-            userRepository.save(superAdmin);
+        if (userRepository.findByUsername("oreo.admin").isEmpty()) {
+            User admin = new User();
+            admin.setUsername("oreo.admin");
+            admin.setEmail("admin@oreo.com");
+            admin.setPassword(passwordEncoder.encode("Oreo1234"));
+            admin.setRole(User.Role.CENTRAL);
+            admin.setBranch(null);
+            userRepository.save(admin);
 
             System.out.println("===========================================");
-            System.out.println("Super Admin creado exitosamente!");
-            System.out.println("Username: superadmin");
-            System.out.println("Password: admin123");
-            System.out.println("===========================================");
-        } else {
-            System.out.println("===========================================");
-            System.out.println("Super Admin ya existe en la base de datos");
-            System.out.println("Username: superadmin");
-            System.out.println("Password: admin123");
+            System.out.println("Usuario CENTRAL creado:");
+            System.out.println("Username: oreo.admin");
+            System.out.println("Password: Oreo1234");
             System.out.println("===========================================");
         }
     }

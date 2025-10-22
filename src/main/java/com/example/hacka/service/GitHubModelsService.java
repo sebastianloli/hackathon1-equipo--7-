@@ -4,8 +4,7 @@ import com.azure.ai.inference.ChatCompletionsClient;
 import com.azure.ai.inference.ChatCompletionsClientBuilder;
 import com.azure.ai.inference.models.*;
 import com.azure.core.credential.AzureKeyCredential;
-import com.example.hacka.dto.AIRequestDTO;
-import com.example.hacka.dto.AIResponseDTO;
+import com.example.hacka.dto.SalesAggregates;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -20,58 +19,57 @@ public class GitHubModelsService {
     @Value("${github.models.endpoint:https://models.inference.ai.azure.com}")
     private String endpoint;
 
-    public AIResponseDTO callModel(AIRequestDTO requestDTO) {
-        AIResponseDTO response = new AIResponseDTO();
+    @Value("${github.models.model.id:gpt-4o-mini}")
+    private String modelId;
 
+    public String generateSummary(SalesAggregates aggregates) {
         try {
-            // Si no hay token configurado, usar respuesta simulada
             if (githubToken == null || githubToken.isEmpty()) {
-                response.setResponse("Respuesta simulada del modelo: " + requestDTO.getModel() +
-                        ". Para usar modelos reales, configure github.models.token en application.properties");
-                response.setTokensUsed(100);
-                response.setModel(requestDTO.getModel());
-                return response;
+                return generateMockSummary(aggregates);
             }
 
-            // Integración real con GitHub Models
             ChatCompletionsClient client = new ChatCompletionsClientBuilder()
                     .credential(new AzureKeyCredential(githubToken))
                     .endpoint(endpoint)
                     .buildClient();
 
+            String prompt = String.format(
+                    "Eres un analista que escribe resúmenes breves y claros para emails corporativos. " +
+                            "Con estos datos: totalUnits=%d, totalRevenue=%.2f, topSku=%s, topBranch=%s. " +
+                            "Escribe un resumen en español, claro y sin alucinaciones. Máximo 120 palabras. " +
+                            "Debe mencionar al menos uno: unidades totales, SKU top, sucursal top, o total recaudado.",
+                    aggregates.getTotalUnits(),
+                    aggregates.getTotalRevenue(),
+                    aggregates.getTopSku(),
+                    aggregates.getTopBranch()
+            );
+
             List<ChatRequestMessage> messages = new ArrayList<>();
-            messages.add(new ChatRequestUserMessage(requestDTO.getMessage()));
+            messages.add(new ChatRequestSystemMessage("Eres un analista que escribe resúmenes breves y claros para emails corporativos."));
+            messages.add(new ChatRequestUserMessage(prompt));
 
             ChatCompletionsOptions options = new ChatCompletionsOptions(messages);
-            options.setModel(getModelName(requestDTO.getModel()));
-            options.setTemperature(0.8);
-            options.setMaxTokens(4096);
+            options.setModel(modelId);
+            options.setMaxTokens(200);
+            options.setTemperature(0.7);
 
             ChatCompletions completions = client.complete(options);
-
-            ChatChoice choice = completions.getChoices().get(0);
-            CompletionsUsage usage = completions.getUsage();
-
-            response.setResponse(choice.getMessage().getContent());
-            response.setTokensUsed(usage.getTotalTokens());
-            response.setModel(requestDTO.getModel());
+            return completions.getChoices().get(0).getMessage().getContent();
 
         } catch (Exception e) {
-            response.setResponse("Error al llamar al modelo: " + e.getMessage());
-            response.setTokensUsed(0);
-            response.setModel(requestDTO.getModel());
+            System.out.println("Error calling GitHub Models: " + e.getMessage());
+            return generateMockSummary(aggregates);
         }
-
-        return response;
     }
 
-    private String getModelName(String modelType) {
-        return switch (modelType.toLowerCase()) {
-            case "gpt-5-mini" -> "gpt-5-mini";
-            case "meta-llama" -> "meta-llama-3.1-405b-instruct";
-            case "deepseek" -> "deepseek-r1";
-            case "openai" -> "gpt-5-mini";
-            default -> "gpt-5-mini";
-        };
+    private String generateMockSummary(SalesAggregates aggregates) {
+        return String.format(
+                "Esta semana vendimos %d unidades con un total de $%.2f en ingresos. " +
+                        "El SKU más vendido fue %s y la sucursal con más ventas fue %s.",
+                aggregates.getTotalUnits(),
+                aggregates.getTotalRevenue(),
+                aggregates.getTopSku(),
+                aggregates.getTopBranch()
+        );
     }
 }

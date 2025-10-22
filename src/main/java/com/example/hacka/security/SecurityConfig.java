@@ -26,10 +26,9 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasAuthority("ROLE_SPARKY_ADMIN")
-                        .requestMatchers("/api/company/**").hasAuthority("ROLE_COMPANY_ADMIN")
-                        .requestMatchers("/api/ai/**").hasAuthority("ROLE_USER")
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/users/**").hasAuthority("CENTRAL")
+                        .requestMatchers("/sales/**").hasAnyAuthority("CENTRAL", "BRANCH")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
